@@ -73,16 +73,6 @@ const configItems = helper.getConfigItems()
           >
             清空缓存
           </UButton>
-          <UFormField v-if="conf.configLevel.intermediate" label="投递数量">
-            <UInputNumber
-              label="投递数量"
-              data-help="达到上限后会自动暂停，默认100次, 当前boss上限为150"
-              v-model="conf.formData.deliveryLimit.value"
-              :min="1"
-              :max="155"
-              :step="10"
-            />
-          </UFormField>
         </div>
       </UForm>
       <div class="flex flex-row *:flex *:flex-row justify-between *:gap-3 mt-3">

@@ -80,8 +80,7 @@ const container = ref<HTMLDivElement>()
           <br />
           6. 配置项 包含/排除 能点击切换模式
           <br />
-          7.
-          投递在达到上限，或者页面无法滚动时会结束投递，反馈相关问题检查是否滚动到底了，无法刷出新岗位!
+          7. 点击开始只会筛选当前页面岗位并展示通过结果，不会自动投递简历或发送招呼语
           <br />
           8. 不再维护暗黑模式, 可改用
           <ULink to="https://darkreader.org" target="_blank"> darkreader 扩展 </ULink>

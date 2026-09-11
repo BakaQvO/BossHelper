@@ -191,7 +191,7 @@ function onPointerMove(ev: PointerEvent) {
               </UButton>
             </UChip>
             <span v-if="todayData.total > 0" style="margin-right: 15px">
-              今日投递: {{ todayData.success }}/{{ conf.formData.deliveryLimit.value }}
+              今日筛选通过: {{ todayData.success }}/{{ todayData.total }}
             </span>
             <span v-if="helper.workflow && helper.workflow.total.value > 0">
               当前页面处理: {{ helper.workflow.current.value }}/{{ helper.workflow.total.value }}

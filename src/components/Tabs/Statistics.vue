@@ -15,23 +15,23 @@ const statisticCycle = ref(1)
 
 const statisticCycleData = [
   {
-    label: '近三日投递',
-    help: '愿你每一次投递都能得到回应',
+    label: '近三日筛选通过',
+    help: '近三天筛选通过的岗位数量',
     date: 3,
   },
   {
-    label: '本周投递',
-    help: '愿你早日找到心满意足的工作',
+    label: '本周筛选通过',
+    help: '近一周筛选通过的岗位数量',
     date: 7,
   },
   {
-    label: '本月投递',
-    help: '愿你在面试中得到满意的结果',
+    label: '本月筛选通过',
+    help: '近一个月筛选通过的岗位数量',
     date: 30,
   },
   {
-    label: '历史投递',
-    help: '愿你能早九晚五还双休带五险',
+    label: '历史筛选通过',
+    help: '历史筛选通过的岗位数量',
     date: -1,
   },
 ]
@@ -60,7 +60,7 @@ onMounted(() => {
   <div class="flex gap-2 flex-col">
     <Alert
       id="config-statistics"
-      description="数据并不完全准确，投递上限根据自身情况调整, 建议 120-140, boss限制最高150"
+      description="数据用于记录岗位筛选结果，点击开始只会筛选当前页面岗位，不会投递简历。"
       color="warning"
       show-icon
     />
@@ -121,16 +121,16 @@ onMounted(() => {
       <UFieldGroup>
         <UButton
           color="primary"
-          data-help="点击开始就会开始投递"
+          data-help="点击开始会筛选当前页面岗位，不会投递简历"
           :loading="helper.workflow?.status.value === 'running'"
           @click="helper.start()"
         >
-          {{ helper.workflow?.status.value === 'stop' ? '继续' : '开始' }}
+          {{ helper.workflow?.status.value === 'stop' ? '继续筛选' : '开始筛选' }}
         </UButton>
         <UButton
           v-if="helper.workflow?.status.value === 'stop'"
           color="warning"
-          data-help="重置已被筛选的岗位，开始将重新处理"
+          data-help="重置筛选结果，开始后将重新处理未通过的岗位"
           @click="helper.reset()"
         >
           重置筛选
@@ -145,9 +145,13 @@ onMounted(() => {
         </UButton>
       </UFieldGroup>
       <UProgress
-        data-help="我会统计当天脚本投递的数量,该记录并不准确"
+        data-help="显示当前页面岗位的筛选进度"
         class="flex-1"
-        :model-value="(todayData.success / conf.formData.deliveryLimit.value) * 100"
+        :model-value="
+          helper.workflow?.total.value
+            ? (helper.workflow.current.value / helper.workflow.total.value) * 100
+            : 0
+        "
       />
     </div>
   </div>

@@ -471,8 +471,8 @@ export class BossHelperCtx extends HelperContext<BossHelperCtx, BoosJobData, {}>
                     type: 'inputNumber',
                     key: 'delayDeliveryStarts',
                     fieldProps: {
-                      label: '投递开始',
-                      'data-help': '点击投递按钮会等待一段时间,默认值10s',
+                      label: '筛选开始',
+                      'data-help': '点击开始筛选后等待一段时间，默认值3秒',
                     },
                     inputNumberProps: {
                       min: 1,
@@ -483,8 +483,8 @@ export class BossHelperCtx extends HelperContext<BossHelperCtx, BoosJobData, {}>
                     type: 'inputNumber',
                     key: 'delayDeliveryInterval',
                     fieldProps: {
-                      label: '投递间隔',
-                      'data-help': '每个投递的间隔,太快易风控,默认值2s',
+                      label: '筛选间隔',
+                      'data-help': '每个岗位之间的筛选间隔，默认值5秒',
                     },
                     inputNumberProps: {
                       min: 1,
@@ -495,8 +495,8 @@ export class BossHelperCtx extends HelperContext<BossHelperCtx, BoosJobData, {}>
                     type: 'inputNumber',
                     key: 'delayDeliveryPageNext',
                     fieldProps: {
-                      label: '投递翻页',
-                      'data-help': '投递完下一页之后等待的间隔,太快易风控,默认值60s',
+                      label: '筛选翻页',
+                      'data-help': '获取下一页岗位前的等待时间，默认值60秒',
                     },
                     inputNumberProps: {
                       min: 1,

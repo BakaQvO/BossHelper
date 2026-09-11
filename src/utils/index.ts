@@ -10,7 +10,7 @@ export async function notification(
 ) {
   return counter.notify({
     ...options,
-    title: options?.title ?? 'Boss直聘批量投简历',
+    title: options?.title ?? 'Boss直聘岗位筛选',
     message: message,
     type: options?.type ?? 'basic',
     iconUrl:

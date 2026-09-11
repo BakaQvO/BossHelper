@@ -98,6 +98,7 @@ export async function useDeliveryWorkflow<C extends HelperContext<C, T, S>, T, S
   const current = ref(0)
   const total = computed(() => helper.jobList.value.length)
   const errorMessage = ref<string | null>(null)
+  const resultsVisible = ref(false)
   const pipeline = shallowRef<Task<C, T, S>[]>([])
   const nodes = shallowRef<
     Array<{
@@ -288,6 +289,7 @@ export async function useDeliveryWorkflow<C extends HelperContext<C, T, S>, T, S
           })
           res = await executeTask(t, data, index, log)
           if (res != null) {
+            res.id ??= t.id
             res.msg ??= t.label ?? t.id
             res.status ??= res.isSkip ? 'warn' : undefined
             if (res.isSkip) {
@@ -321,15 +323,15 @@ export async function useDeliveryWorkflow<C extends HelperContext<C, T, S>, T, S
           }
         }
       }
-      if (!skipPipeline) {
+      if (!skipPipeline && !isStop()) {
         helper.jobResultMaps.set(data.jobData.key, {
           status: 'success',
-          msg: '投递成功',
+          msg: '筛选通过',
         })
         helper.statistics.todayData.value.success++
       } else if (!errorLog) {
         const r = helper.jobResultMaps.get(data.jobData.key)
-        log.warn(`投递过滤: ${data.jobData.jobName}`, r?.msg, r?.reason)
+        log.warn(`筛选过滤: ${data.jobData.jobName}`, r?.msg, r?.reason)
       }
     } catch (e) {
       status.value = 'error'
@@ -341,14 +343,16 @@ export async function useDeliveryWorkflow<C extends HelperContext<C, T, S>, T, S
     await rebuild()
 
     let stepMsg = ''
+    let failed = false
     errorMessage.value = null
+    resultsVisible.value = false
     status.value = 'running'
     const isStop = () => status.value === 'stop'
 
     try {
       while (status.value === 'running') {
         if (helper.jobList.value.length === 0) {
-          stepMsg = '没有职位可投递'
+          stepMsg = '没有岗位可筛选'
           break
         }
         helper.jobList.value.forEach((job) => {
@@ -356,7 +360,8 @@ export async function useDeliveryWorkflow<C extends HelperContext<C, T, S>, T, S
           if (!v) {
             helper.jobResultMaps.set(job.key, { status: 'wait', msg: '等待中' })
             return
-          } else if (v.status === 'success' || v.status === 'warn') {
+          }
+          if (v.status === 'success' || v.status === 'warn') {
             return
           }
           v.status = 'wait'
@@ -381,36 +386,36 @@ export async function useDeliveryWorkflow<C extends HelperContext<C, T, S>, T, S
           helper.jobMaps.set(jobData.key, data)
           helper.currentJob.value = jobData.key
           await execute(data, index)
-          if (
-            helper.statistics.todayData.value.success >= helper.conf.formData.deliveryLimit.value
-          ) {
-            stepMsg = `投递达到数量限制`
-            status.value = 'stop'
-            break
+          if (index < helper.jobList.value.length - 1) {
+            await delay(helper.conf.formData.delayDeliveryInterval, isStop)
           }
-          await delay(helper.conf.formData.delayDeliveryInterval, isStop)
         }
-        if (isStop()) break
+
+        if (isStop()) {
+          stepMsg = '筛选已暂停'
+          break
+        }
         const hasMore = await helper.loadMoreJob(
           delay(helper.conf.formData.delayDeliveryPageNext, isStop),
         )
         if (!hasMore) {
           status.value = 'stop'
-          stepMsg = '投递结束, 无法继续下一页'
+          stepMsg = '筛选结束, 无法继续下一页'
           break
         }
       }
     } catch (e) {
-      logger.error('投递未知错误', e)
+      logger.error('筛选未知错误', e)
       stepMsg = `未知错误: ${e instanceof Error ? e.message : JSON.stringify(e)}`
+      failed = true
     } finally {
-      if (!stepMsg) {
-        stepMsg = '投递结束'
-        status.value = 'pending'
-      } else if (status.value !== 'stop') {
+      if (failed) {
         status.value = 'error'
         errorMessage.value = stepMsg
+      } else if (status.value !== 'stop') {
+        status.value = 'pending'
       }
+      resultsVisible.value = true
       void helper.notification(stepMsg)
 
       const now = new Date()
@@ -432,14 +437,10 @@ export async function useDeliveryWorkflow<C extends HelperContext<C, T, S>, T, S
   const stop = () => (status.value = 'stop')
   const reset = () => {
     status.value = 'pending'
-    helper.jobList.value.forEach((job) => {
-      const v = helper.jobResultMaps.get(job.key)
-      if (!v || v.status === 'success') {
-        return
-      }
-      v.msg = '等待中'
-      v.status = 'wait'
-    })
+    resultsVisible.value = false
+    current.value = 0
+    helper.currentJob.value = null
+    helper.jobResultMaps.clear()
   }
 
   return {
@@ -448,6 +449,7 @@ export async function useDeliveryWorkflow<C extends HelperContext<C, T, S>, T, S
     current,
     total,
     errorMessage,
+    resultsVisible,
     pipeline,
     nodes,
     ctx: helper,

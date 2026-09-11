@@ -13,11 +13,16 @@ const cards = ref<HTMLDivElement>()
 const helper = useHelper()
 
 const filterItemsChecked = ref<Record<string, boolean>>({})
+const isFilteredResultsVisible = computed(() => helper.workflow?.resultsVisible.value ?? false)
+
+function isFilterItemChecked(value: string) {
+  return filterItemsChecked.value[value] ?? (!isFilteredResultsVisible.value || value === 'success')
+}
 
 const filterItems = computed<(DropdownMenuItem & { value: string })[]>(() =>
   (
     [
-      { type: 'checkbox', value: 'success', label: '投递成功', color: 'success' },
+      { type: 'checkbox', value: 'success', label: '筛选通过', color: 'success' },
       ...(helper.workflow?.pipeline.value.map(
         (item) =>
           ({
@@ -26,12 +31,12 @@ const filterItems = computed<(DropdownMenuItem & { value: string })[]>(() =>
             value: item.id,
           }) satisfies DropdownMenuItem,
       ) ?? []),
-      { type: 'checkbox', value: 'error', label: '投递错误', color: 'error' },
+      { type: 'checkbox', value: 'error', label: '筛选错误', color: 'error' },
       { type: 'checkbox', value: 'not_started', label: '未开始' },
     ] satisfies DropdownMenuItem[]
   ).map((item) => ({
     ...item,
-    checked: filterItemsChecked.value[item.value] ?? true,
+    checked: isFilterItemChecked(item.value),
     onUpdateChecked(checked: boolean) {
       filterItemsChecked.value[item.value] = checked
     },
@@ -44,19 +49,26 @@ const filterItems = computed<(DropdownMenuItem & { value: string })[]>(() =>
 const jobList = computed(() => {
   return helper.jobList.value.filter((job) => {
     const res = helper.jobResultMaps.get(job.key)
-    if (!res || !res.id) {
-      return filterItemsChecked.value.not_started ?? true
+    if (!res) {
+      return isFilterItemChecked('not_started')
     }
     if (res.status === 'success') {
-      return filterItemsChecked.value.success ?? true
+      return isFilterItemChecked('success')
     }
     if (res.status === 'error') {
-      return filterItemsChecked.value.error ?? true
+      return isFilterItemChecked('error')
     }
-    if (filterItemsChecked.value[res.id] === false) {
-      return false
-    }
-    return true
+    return isFilterItemChecked(res.id ?? 'not_started')
+  })
+})
+
+watch(isFilteredResultsVisible, (visible) => {
+  if (!visible) {
+    filterItemsChecked.value = {}
+    return
+  }
+  filterItems.value.forEach((item) => {
+    filterItemsChecked.value[item.value] = item.value === 'success'
   })
 })
 

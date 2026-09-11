@@ -3,13 +3,12 @@ import { useFavicon, useStorageAsync, useTitle } from '@vueuse/core'
 import { watch, watchEffect } from 'vue'
 
 import Alert from '@/components/Alert.vue'
-import { useConf, appearanceConf } from '@/composables/conf'
+import { appearanceConf } from '@/composables/conf'
 import { useHelper } from '@/composables/useHelper'
 
 const title = useTitle(undefined, { observe: true })
 const helper = useHelper()
 const { todayData } = helper.statistics
-const { formData } = useConf()
 
 watch(
   () => appearanceConf.value.changeIcon,
@@ -40,7 +39,7 @@ watch(
       dynamicTitle?.stop()
     } else {
       dynamicTitle = watchEffect(() => {
-        title.value = `${todayData.value.success}/${formData.deliveryLimit.value} - 在线计算器`
+        title.value = `${todayData.value.success}/${todayData.value.total} - 在线计算器`
       })
     }
   },

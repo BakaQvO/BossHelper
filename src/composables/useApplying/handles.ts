@@ -4,7 +4,7 @@ import type { HelperContext } from '~/composables/useHelper'
 import { sameCompanyKey, sameHrKey } from '../../entrypoints/boss/requests'
 import type { JobStatus, TaskContext, TaskResult } from './type'
 import { defineTaskHandler } from './type'
-import { loadSet, parseFiltering, rangeMatch, rangeMatchFormat, saveSet } from './utils'
+import { loadSet, parseFiltering, rangeMatch, rangeMatchFormat } from './utils'
 
 export class DependencyMissingError extends Error {
   constructor(public taskId: string) {
@@ -81,27 +81,6 @@ export class TaskRegistry<C extends HelperContext<C, T, S>, T, S = {}> {
             return taskResult.skip('相同公司已投递')
           }
         },
-        after: [
-          async (ctx, { jobData: data }) => {
-            someSet.set(data.key, Date.now())
-            if (ctx.index % 3 === 0) {
-              await saveSet(
-                sameCompanyKey,
-                ctx.helper.uid,
-                someSet,
-                ctx.helper.conf.formData.sameCompanyFilter.expire,
-              )
-            }
-          },
-        ],
-        onEnd: async (ctx) => {
-          await saveSet(
-            sameCompanyKey,
-            ctx.helper.uid,
-            someSet,
-            ctx.helper.conf.formData.sameCompanyFilter.expire,
-          )
-        },
       }
     },
     { label: '相同公司' },
@@ -120,27 +99,6 @@ export class TaskRegistry<C extends HelperContext<C, T, S>, T, S = {}> {
             ctx.helper.statistics.todayData.value.repeat++
             return taskResult.skip('相同hr已投递')
           }
-        },
-        after: [
-          async (ctx, { jobData: data }) => {
-            someSet.set(data.key, Date.now())
-            if (ctx.index % 3 === 0) {
-              await saveSet(
-                sameHrKey,
-                ctx.helper.uid,
-                someSet,
-                ctx.helper.conf.formData.sameHrFilter.expire,
-              )
-            }
-          },
-        ],
-        onEnd: async (ctx) => {
-          await saveSet(
-            sameHrKey,
-            ctx.helper.uid,
-            someSet,
-            ctx.helper.conf.formData.sameHrFilter.expire,
-          )
         },
       }
     },

@@ -134,7 +134,8 @@ export const formInfoData: Record<string, any> = {
     },
     transitDuration: {
       label: '公共交通时间',
-      'data-help': '公交/地铁通勤时间, 为0禁用，单位: 分钟，需要高德公交路径规划权限',
+      'data-help':
+        '公交/地铁通勤时间, 为0禁用，单位: 分钟，使用高德 Web 服务 Key，无需单独开通公交权限',
     },
   },
 }

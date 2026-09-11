@@ -125,6 +125,10 @@ function getActiveTimeType(job: JobData): 'success' | 'warning' | 'error' {
       </div>
     </div>
 
+    <div v-if="jobResult?.reason" class="card-result-reason" :title="jobResult.reason">
+      {{ jobResult.reason }}
+    </div>
+
     <div v-if="job.activeTime || job.activeTimeStr" class="active-time-tag">
       <UBadge :color="getActiveTimeType(job)" variant="subtle">
         活跃时间：{{

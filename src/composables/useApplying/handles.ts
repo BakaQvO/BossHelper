@@ -36,13 +36,13 @@ function amapHandler<C extends HelperContext<C, T, S>, T, S>(
   id: string,
   distance: number,
   duration: number,
-  amap?: { ok: boolean; distance: number; duration: number },
+  amap?: { ok: boolean; distance: number; duration: number; reason?: string },
 ): TaskResult | void {
   if (distance <= 0 && duration <= 0) {
     return
   }
   if (!amap || amap.ok === false) {
-    return taskResult.skip(`${id}通勤数据未获取`)
+    return taskResult.skip(amap?.reason || `${id}通勤数据未获取`)
   }
   if (distance > 0 && amap.distance > distance * 1000) {
     return taskResult.skip(`${id}距离超标: ${amap.distance / 1000} 设定: ${distance}`)
@@ -411,7 +411,7 @@ export class TaskRegistry<C extends HelperContext<C, T, S>, T, S = {}> {
       }
       state.amap.distance = await amapDistance(
         state.amap.geocode.location,
-        jobData.city || state.amap.geocode.city || state.amap.geocode.citycode,
+        state.amap.geocode.citycode || state.amap.geocode.city || jobData.city,
       )
 
       if (state.amap == null || state.amap.distance == null) {

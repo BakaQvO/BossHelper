@@ -180,6 +180,18 @@ html.dark {
     margin-block-start: auto;
     padding: 5px 0;
   }
+  .card-result-reason {
+    display: -webkit-box;
+    margin-top: 0.5rem;
+    overflow: hidden;
+    color: #9f2f22;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    user-select: text;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
   .active-time-tag {
     padding: 0.5rem 0;
     display: flex;
@@ -273,6 +285,9 @@ html.dark {
 
     .card-salary {
       color: #ff442e;
+    }
+    .card-result-reason {
+      color: #ff9a8d;
     }
 
     .author-row {

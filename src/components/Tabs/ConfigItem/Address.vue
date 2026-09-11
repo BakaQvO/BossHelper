@@ -21,6 +21,7 @@ async function amapGeocodeHandler() {
   } catch (error) {
     toast.add({
       title: '获取地址失败',
+      description: error instanceof Error ? error.message : String(error),
       color: 'error',
     })
     logger.error('AmapGeocodeError', error)

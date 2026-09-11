@@ -123,7 +123,7 @@ function gotoAmapDevSetting() {
             :precision="2"
             :max="1440"
             :min="0"
-            :step="30"
+            :step="1"
           />
 
           <UBadge label="分钟" />
@@ -149,7 +149,7 @@ function gotoAmapDevSetting() {
             :precision="2"
             :max="1440"
             :min="0"
-            :step="30"
+            :step="1"
           />
           <UBadge label="分钟" />
         </UFieldGroup>
@@ -161,7 +161,7 @@ function gotoAmapDevSetting() {
             :precision="2"
             :max="1440"
             :min="0"
-            :step="30"
+            :step="1"
           />
           <UBadge label="分钟" />
         </UFieldGroup>

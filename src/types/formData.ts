@@ -43,6 +43,7 @@ export interface FormData {
     drivingDuration: number
     walkingDistance: number
     walkingDuration: number
+    transitDuration: number
     enable: boolean
   }
   record: { model?: string[]; enable: boolean }

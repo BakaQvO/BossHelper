@@ -38,18 +38,17 @@ function amapHandler<C extends HelperContext<C, T, S>, T, S>(
   duration: number,
   amap?: { ok: boolean; distance: number; duration: number },
 ): TaskResult | void {
+  if (distance <= 0 && duration <= 0) {
+    return
+  }
   if (!amap || amap.ok === false) {
-    return taskResult.skip('高德地图未初始化')
+    return taskResult.skip(`${id}通勤数据未获取`)
   }
   if (distance > 0 && amap.distance > distance * 1000) {
-    return taskResult.skip(
-      `${id}距离超标: ${amap.distance / 1000} 设定: ${ctx.helper.conf.formData.amap.straightDistance}`,
-    )
+    return taskResult.skip(`${id}距离超标: ${amap.distance / 1000} 设定: ${distance}`)
   }
   if (duration > 0 && amap.duration > duration * 60) {
-    return taskResult.skip(
-      `${id}时间超标: ${amap.duration / 60} 设定: ${ctx.helper.conf.formData.amap.drivingDuration}`,
-    )
+    return taskResult.skip(`${id}时间超标: ${amap.duration / 60} 设定: ${duration}`)
   }
 }
 
@@ -410,7 +409,10 @@ export class TaskRegistry<C extends HelperContext<C, T, S>, T, S = {}> {
       if (!state.amap.geocode?.location) {
         return taskResult.skip('未获取到地址经纬度')
       }
-      state.amap.distance = await amapDistance(state.amap.geocode.location)
+      state.amap.distance = await amapDistance(
+        state.amap.geocode.location,
+        jobData.city || state.amap.geocode.city || state.amap.geocode.citycode,
+      )
 
       if (state.amap == null || state.amap.distance == null) {
         return taskResult.skip('api数据异常')
@@ -436,6 +438,13 @@ export class TaskRegistry<C extends HelperContext<C, T, S>, T, S = {}> {
           ctx.helper.conf.formData.amap.walkingDistance,
           ctx.helper.conf.formData.amap.walkingDuration,
           state.amap.distance.walking,
+        ),
+        amapHandler(
+          ctx,
+          '公共交通',
+          0,
+          ctx.helper.conf.formData.amap.transitDuration,
+          state.amap.distance.transit,
         ),
       ]
     }

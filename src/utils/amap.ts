@@ -47,6 +47,18 @@ export interface AmapDistance {
   }>
 }
 
+export interface AmapTransit {
+  status: string
+  info: string
+  infocode: string
+  count: string
+  route?: {
+    transits?: Array<{
+      duration: string
+    }>
+  }
+}
+
 export async function amapGeocode(
   address: string,
 ): Promise<AmapGeocode['geocodes'][number] | undefined> {
@@ -71,6 +83,26 @@ async function fetchDistance(
   ).then((r) => r.json())
 }
 
+async function fetchTransit(
+  origins: string,
+  destination: string,
+  city: string,
+  key: string,
+): Promise<AmapTransit | AmapError> {
+  const params = new URLSearchParams({
+    origin: origins,
+    destination,
+    city,
+    strategy: '0',
+    nightflag: '0',
+    output: 'JSON',
+    key,
+  })
+  return fetch(`https://restapi.amap.com/v3/direction/transit/integrated?${params}`).then((r) =>
+    r.json(),
+  )
+}
+
 function extractResult(res: AmapDistance | AmapError) {
   if (res.status === '1' && 'results' in res) {
     return {
@@ -82,19 +114,42 @@ function extractResult(res: AmapDistance | AmapError) {
   return { ok: false, distance: 0, duration: 0 }
 }
 
-export async function amapDistance(destination: string) {
-  const { formData } = useConf()
-  const { origins, key } = formData.amap
+function extractTransitResult(res: AmapTransit | AmapError | undefined) {
+  const durations =
+    res && 'route' in res
+      ? (res.route?.transits ?? [])
+          .map((transit) => Number(transit.duration))
+          .filter((value) => Number.isFinite(value) && value > 0)
+      : []
+  if (res?.status === '1' && durations.length > 0) {
+    return {
+      ok: true,
+      distance: 0,
+      duration: Math.min(...durations),
+    }
+  }
+  return { ok: false, distance: 0, duration: 0 }
+}
 
-  const [res0, res1, res3] = await Promise.all([
+export async function amapDistance(destination: string, city?: string) {
+  const { formData } = useConf()
+  const { origins, key, transitDuration } = formData.amap
+  const transitRequest =
+    transitDuration > 0 && city
+      ? fetchTransit(origins, destination, city, key)
+      : Promise.resolve<AmapTransit | AmapError | undefined>(undefined)
+
+  const [res0, res1, res3, resTransit] = await Promise.all([
     fetchDistance(origins, destination, 0, key),
     fetchDistance(origins, destination, 1, key),
     fetchDistance(origins, destination, 3, key),
+    transitRequest,
   ])
 
   return {
     straight: extractResult(res0),
     driving: extractResult(res1),
     walking: extractResult(res3),
+    transit: extractTransitResult(resTransit),
   }
 }

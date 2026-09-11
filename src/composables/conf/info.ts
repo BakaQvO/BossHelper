@@ -132,6 +132,10 @@ export const formInfoData: Record<string, any> = {
       label: '步行时间',
       'data-help': '步行时间, 为0禁用，单位: 分钟',
     },
+    transitDuration: {
+      label: '公共交通时间',
+      'data-help': '公交/地铁通勤时间, 为0禁用，单位: 分钟，需要高德公交路径规划权限',
+    },
   },
 }
 
@@ -306,6 +310,7 @@ export const defaultFormData: FormData = {
     drivingDuration: 0,
     walkingDistance: 0,
     walkingDuration: 0,
+    transitDuration: 0,
     enable: false,
   },
   record: {

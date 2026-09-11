@@ -65,6 +65,7 @@ function gotoAmapDevSetting() {
           <span v-pre>驾车时间: {{ amap.drivingDuration }}分钟</span>
           <span v-pre>步行距离: {{ amap.walkingDistance }}km</span>
           <span v-pre>步行时间: {{ amap.walkingDuration }}分钟</span>
+          <span v-pre>公共交通时间: {{ amap.transitDuration }}分钟</span>
         </div>
       </template>
     </Alert>
@@ -145,6 +146,18 @@ function gotoAmapDevSetting() {
         <UFieldGroup>
           <UInputNumber
             v-model="conf.formData.amap.walkingDuration"
+            :precision="2"
+            :max="1440"
+            :min="0"
+            :step="30"
+          />
+          <UBadge label="分钟" />
+        </UFieldGroup>
+      </UFormField>
+      <UFormField v-bind="formInfoData.amap.transitDuration">
+        <UFieldGroup>
+          <UInputNumber
+            v-model="conf.formData.amap.transitDuration"
             :precision="2"
             :max="1440"
             :min="0"
